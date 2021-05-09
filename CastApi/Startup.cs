@@ -1,15 +1,12 @@
+using CastApi.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using CastApi.Interfaces;
+using CastApi.Services;
 
 namespace CastApi
 {
@@ -26,8 +23,19 @@ namespace CastApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
             services.AddSwaggerGen();
+
+            string mysqlConnectionString = Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddDbContextPool<DataContext>(
+                options =>
+                    options.UseMySql(
+                        mysqlConnectionString,
+                        ServerVersion.AutoDetect(mysqlConnectionString)
+                    )
+                );
+
+            services.AddScoped<ISCurso, SCurso>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
