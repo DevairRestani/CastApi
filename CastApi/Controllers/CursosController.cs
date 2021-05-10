@@ -1,5 +1,6 @@
 ﻿using CastApi.Interfaces;
 using CastApi.Models;
+using CastApi.Services.Communication;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -52,17 +53,15 @@ namespace CastApi.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="curso"></param>
-        /// <returns>Não tem retorno</returns>
+        /// <returns>Retorna um erro quando houver.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCurso(int id, Curso curso)
         {
-            try
+            CursoResponse response = await _sCurso.AtualizarCursoAsync(id, curso);
+
+            if (!response.Success)
             {
-                await _sCurso.AtualizarCursoAsync(id, curso);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
+                return BadRequest(response.Message);
             }
 
             return NoContent();
@@ -76,12 +75,11 @@ namespace CastApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Curso>> PostCurso(Curso curso)
         {
-            try
+                CursoResponse response = await _sCurso.CriarCursoAsync(curso);
+
+            if (!response.Success)
             {
-                await _sCurso.CriarCursoAsync(curso);
-            }catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
+                return BadRequest(response.Message);
             }
 
             return curso;
@@ -91,15 +89,15 @@ namespace CastApi.Controllers
         /// Daleta um curso
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>Não tem retorno</returns>
+        /// <returns>Retorna um erro quando houver</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCurso(int id)
         {
-            bool sucesso = await _sCurso.DeletarCursoAsync(id);
+            CursoResponse response = await _sCurso.DeletarCursoAsync(id);
 
-            if (!sucesso)
+            if (!response.Success)
             {
-                return BadRequest();
+                return BadRequest(response.Message);
             }
 
             return NoContent();

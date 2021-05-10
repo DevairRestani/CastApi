@@ -1,4 +1,5 @@
 ﻿using CastApi.Models;
+using CastApi.Services.Communication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace CastApi.Interfaces
     public interface ISCurso
     {
         Task<List<Curso>> ListarCursosAsync();
-        Task<Curso> CriarCursoAsync(Curso curso);
-        Task<Curso> AtualizarCursoAsync(int id, Curso curso);
+        Task<CursoResponse> CriarCursoAsync(Curso curso);
+        Task<CursoResponse> AtualizarCursoAsync(int id, Curso curso);
         Task<bool> CursoExisteAsync(int id);
         Task<Curso> BuscarCursoAsync(int id);
-        Task<bool> DeletarCursoAsync(int id);
+        Task<CursoResponse> DeletarCursoAsync(int id);
     }
 }

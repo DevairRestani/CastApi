@@ -1,6 +1,7 @@
 ﻿using CastApi.Data;
 using CastApi.Interfaces;
 using CastApi.Models;
+using CastApi.Services.Communication;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -49,29 +50,29 @@ namespace CastApi.Services
         /// </summary>
         /// <param name="curso"></param>
         /// <returns>Retorna o Curso Cadastrado.</returns>
-        public async Task<Curso> CriarCursoAsync(Curso curso)
+        public async Task<CursoResponse> CriarCursoAsync(Curso curso)
         {
             if (curso is null)
             {
-                throw new ArgumentNullException(nameof(curso));
+                return new CursoResponse("Curso inválido");
             }
 
             int qtdConflitos = await ConflitosEntreDatasAsync(curso);
 
             if (qtdConflitos > 0)
             {
-                throw new ArgumentException("Existe(m) curso(s) planejados(s) dentro do período informado.");
+                return new CursoResponse("Existe(m) curso(s) planejados(s) dentro do período informado.");
             }
 
             if (curso.DataInicio < DateTime.Now)
             {
-                throw new ArgumentException("A data de incío do curso não pode ser menor que a data de hoje.");
+                return new CursoResponse("A data de incío do curso não pode ser menor que a data de hoje.");
             }
 
             _context.Cursos.Add(curso);
             await _context.SaveChangesAsync();
 
-            return curso;
+            return new CursoResponse(curso);
         }
 
         /// <summary>
@@ -80,18 +81,18 @@ namespace CastApi.Services
         /// <param name="id"></param>
         /// <param name="curso"></param>
         /// <returns>Não tem retorno.</returns>
-        public async Task<Curso> AtualizarCursoAsync(int id, Curso curso)
+        public async Task<CursoResponse> AtualizarCursoAsync(int id, Curso curso)
         {
             if (id != curso.CursoId)
             {
-                throw new ArgumentException("Id Inválido");
+                return new CursoResponse("Id Inválido");
             }
 
             int qtdConflitos = await ConflitosEntreDatasAsync(curso);
 
             if (qtdConflitos > 0)
             {
-                throw new ArgumentException("Existe(m) curso(s) planejados(s) dentro do período informado.");
+                return new CursoResponse("Existe(m) curso(s) planejados(s) dentro do período informado.");
             }
 
             _context.Entry(curso).State = EntityState.Modified;
@@ -104,13 +105,13 @@ namespace CastApi.Services
             {
                 if (! await CursoExisteAsync(id))
                 {
-                    throw new ArgumentException("Este curso não existe");
+                    return new CursoResponse("Este curso não existe");
                 }
 
                 throw;
             }
 
-            return curso;
+            return new CursoResponse(curso);
         }
 
         /// <summary>
@@ -131,6 +132,7 @@ namespace CastApi.Services
         public async Task<Curso> BuscarCursoAsync(int id)
         {
             return await _context.Cursos.FindAsync(id);
+
         }
 
         /// <summary>
@@ -138,18 +140,19 @@ namespace CastApi.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Não tem retorno</returns>
-        public async Task<bool> DeletarCursoAsync(int id)
+        public async Task<CursoResponse> DeletarCursoAsync(int id)
         {
             Curso curso = await _context.Cursos.FindAsync(id);
+
             if (curso == null)
             {
-                return false;
+                return new CursoResponse("Ocorreu um erro ao deletar o curso");
             }
 
             _context.Cursos.Remove(curso);
             await _context.SaveChangesAsync();
 
-            return true;
+            return new CursoResponse(curso);
         }
     }
 }
